@@ -1,0 +1,531 @@
+{% extends "base.html" %}
+
+{% block title %}Students Marks Table{% endblock %}
+
+{% block links %}
+  <!-- DataTables CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="bg-gray-100 p-8 py-11">
+  <div class="mx-auto bg-white p-6 rounded-lg shadow-md">
+    <!-- Batch Information Header -->
+    <div class="bg-white border border-gray-200 rounded-lg shadow p-6 mb-6">
+      <div class="flex flex-col md:flex-row md:justify-between md:items-center">
+        <h2 class="text-2xl md:text-3xl font-bold text-gray-800">
+          {{ batch.course_name }} - {{ batch.semester }}
+        </h2>
+        <p class="mt-2 md:mt-0 text-sm text-gray-500">
+          Session: <span class="font-semibold text-gray-700">{{ batch.session }}</span> |
+          Type: <span class="font-semibold text-gray-700">{{ batch.type.value|title }}</span> |
+          Uploaded: <span class="font-semibold text-gray-700">{{ batch.timestamp.strftime('%d-%b-%Y -- %I:%M %p') }}</span>
+        </p>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex border-b">
+        <button
+            class="tab-btn px-4 py-2 text-gray-600 hover:text-blue-600 border-b-2 border-transparent hover:border-blue-600 active"
+            onclick="switchTab(event, 'tableView')">
+            Table View
+        </button>
+        <button
+            class="tab-btn px-4 py-2 text-gray-600 hover:text-blue-600 border-b-2 border-transparent hover:border-blue-600"
+            onclick="switchTab(event, 'resultView')">
+            Result View (SGPA)
+        </button>
+        <button
+            class="tab-btn px-4 py-2 text-gray-600 hover:text-blue-600 border-b-2 border-transparent hover:border-blue-600"
+            onclick="switchTab(event, 'moreView')">
+            Overall
+        </button>
+    </div>
+
+    <!-- Table View Tab -->
+    <div id="tableView" class="tab-content p-5 active overflow-x-auto">
+          <table id="marksTable" style="width: 100%;">
+              <colgroup>
+                  <col style="width: 60px;"> <!-- Sr. NO.-->
+                  <col style="width: 100px;"> <!-- Name -->
+                  <col style="width: 113px;"> <!-- Roll Number -->
+                  <col style="width: 95px;"> <!-- College Code -->
+                  <col style="width: 108px;"> <!-- Semester -->
+                  {% for subject in subjects if '(P)' not in subject %}
+                  <col style="width: 65px;"> <!-- Internal Max -->
+                  <col style="width: 65px;"> <!-- Internal Score -->
+                  <col style="width: 65px;"> <!-- Theory Max -->
+                  <col style="width: 65px;"> <!-- Theory Score -->
+                  {% endfor %}
+                  <col style="width: 85px;"> <!-- Result -->
+                  <col style="width: 80px;"> <!-- SGPA -->
+              </colgroup>
+              <!-- Table Header -->
+              <thead style="font-size: medium;">
+                  <tr>
+                      <th rowspan="3" class="small_text">Sr. No.</th>
+                      <th rowspan="3">Name</th>
+                      <th rowspan="3">Roll Number</th>
+                      <th rowspan="3">College Code</th>
+                      <th rowspan="3">Semester</th>
+                      {% for subject in subjects if '(P)' not in subject %}
+                      <th colspan="4" {% if not loop.last %}class="subject-separator"{% endif %}>
+                          {{ subject }}
+                      </th>
+                      {% endfor %}
+                      <th rowspan="3">Result</th>
+                      <th rowspan="3">SGPA</th>
+                  </tr>
+                  <tr>
+                      {% for subject in subjects if '(P)' not in subject %}
+                      <th colspan="2" class="small_text">Internal</th>
+                      <th colspan="2" class="small_text {% if not loop.last %}subject-separator{% endif %}">Theory</th>
+                      {% endfor %}
+                  </tr>
+                  <tr>
+                      {% for subject in subjects if '(P)' not in subject %}
+                      <th class="micro_text">Max</th>
+                      <th class="micro_text">Score</th>
+                      <th class="micro_text">Max</th>
+                      <th class="micro_text {% if not loop.last %}subject-separator{% endif %}">Score</th>
+                      {% endfor %}
+                  </tr>
+              </thead>
+              <!-- Table Body -->
+              <tbody style="font-size: medium;">
+                  {% for student in students %}
+                  <tr>
+                      <td>{{ loop.index }}.</td>
+                      <td class="small_text name-column" title="{{ student.name }}">
+                          {% if student.name %}
+                          {% set name_words = student.name.split(' ') %}
+                          {{ name_words[:3] | join(' ') }}
+                          {% else %}
+                          No name provided
+                          {% endif %}
+                      </td>
+                      <td>{{ student.roll_number }}</td>
+                      {% if student.college and student.college is not none %}
+                      <td>{{ student.college[3:6] }}...</td>
+                      {% else %}
+                      <td>...</td>
+                      {% endif %}
+                      <td class="small_text">{{ batch.semester }}</td>
+                      {% for subject in subjects if '(P)' not in subject %}
+                          {% if subject in student.subjects %}
+                          <td>{{ student.subjects[subject].exams['internal']['max'] }}</td>
+                          <td>{{ student.subjects[subject].exams['internal']['scored'] }}</td>
+                          <td>{{ student.subjects[subject].exams['theory']['max'] }}</td>
+                          <td {% if not loop.last %}class="subject-separator"{% endif %}>
+                              {{ student.subjects[subject].exams['theory']['scored'] }}
+                          </td>
+                          {% else %}
+                          <td></td>
+                          <td></td>
+                          <td></td>
+                          <td {% if not loop.last %}class="subject-separator"{% endif %}></td>
+                          {% endif %}
+                      {% endfor %}
+                      <td>{{ student.result }}</td>
+                      <td>{{ student.sgpa }}</td>
+                  </tr>
+                  {% endfor %}
+              </tbody>
+          </table>
+        <div class="flex justify-between m-4">
+            <button id="exportPDF" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md">Download as PDF</button>
+            <button id="exportExcel" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md">Download as Sheet</button>
+            <button id="shareBtn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md">Share This Page</button>
+<!--            <button id="deleteAllBtn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md">Delete All Records</button>-->
+            <!-- View Button  -->
+            <div class="mt-4">
+                <a href="{{ url_for('delete_records', batch_id=batch.id) }}"
+                   class="inline-block bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded transition-colors duration-300">
+                        Delete All Records
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data visualization Tab -->
+    <div id="resultView" class="tab-content p-4 hidden">
+        <canvas id="highestSgpaChart" width="400" height="200"></canvas>
+    </div>
+
+    <!-- Overall Tab -->
+    <div id="moreView" class="tab-content p-4 hidden">
+      <!-- Canvas element for the pie chart -->
+      <div class="flex justify-center mt-5 mb-10">
+        <canvas id="myPieChart" width="700" height="500"></canvas>
+      </div>
+
+      <!-- Two-column grid for tables -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Summary Metrics Table -->
+        <div class="overflow-x-auto">
+          <h4 class="text-lg font-bold mb-4">Summary Table</h4>
+          <table class="min-w-full bg-white shadow rounded-lg text-sm">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">Metric</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">Value</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-6 py-4">Total Students</td>
+                <td class="px-6 py-4">{{ total_students }}</td>
+              </tr>
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-6 py-4">Passed</td>
+                <td class="px-6 py-4">{{ pass_count }}</td>
+              </tr>
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-6 py-4">Failed</td>
+                <td class="px-6 py-4">{{ fail_count }}</td>
+              </tr>
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-6 py-4">Given Exam</td>
+                <td class="px-6 py-4">{{ given_exam_count }}</td>
+              </tr>
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-6 py-4">Not Given Exam</td>
+                <td class="px-6 py-4">{{ not_given_exam_count }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Top Students Ranking Table -->
+        <div>
+          <h4 class="text-lg font-bold mb-4">Top Students Ranking (Top 3 Ranks)</h4>
+          <div class="overflow-x-auto">
+            <table class="min-w-full bg-white shadow rounded-lg text-sm">
+              <thead class="bg-gray-100">
+                <tr>
+                  <th class="px-6 py-3 text-center text-xs font-medium text-gray-800 uppercase tracking-wider">Rank</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">Name</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">Roll Number</th>
+                  <th class="px-6 py-3 text-center text-xs font-medium text-gray-800 uppercase tracking-wider">SGPA</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200">
+                {% for student in top_students %}
+                <tr class="hover:bg-gray-50 transition-colors">
+                  <td class="px-6 py-4 text-center">{{ student.rank }}</td>
+                  <td class="px-6 py-4 whitespace-normal break-words text-xs">{{ student.name }}</td>
+                  <td class="px-6 py-4">{{ student.roll_number or "None" }}</td>
+                  <td class="px-6 py-4 text-center">{{ student.sgpa }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+
+<!--For datatable and switching tab logic      -->
+<script>
+  // Initialize DataTable
+  $('#marksTable').DataTable({
+    paging: true,
+    searching: true,
+    ordering: true,
+  });
+
+
+  // Tab switching logic
+  function switchTab(event, tabId) {
+    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+    document.querySelectorAll('.tab-btn').forEach(tab => {
+      tab.classList.remove('text-blue-600', 'border-blue-600');
+      tab.classList.add('text-gray-600', 'border-transparent');
+    });
+    document.getElementById(tabId).classList.remove('hidden');
+    event.currentTarget.classList.add('text-blue-600', 'border-blue-600');
+  }
+</script>
+
+<!--Line chart logic here      -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // Get students data passed from the server as JSON
+    var studentsData = {{ students|tojson }};
+
+    // Filter out any student record with null/None values for sgpa, roll_number, or name
+    studentsData = studentsData.filter(function(student) {
+        return student.sgpa !== null && student.roll_number !== null && student.name !== null;
+    });
+
+    // Sort students by sgpa in descending order
+    studentsData.sort((a, b) => b.sgpa - a.sgpa);
+
+    // Use the filtered and sorted data for the chart
+    var topStudents = studentsData;
+
+    // Create chart labels from roll numbers (using last 2 digits)
+    var labels = topStudents.map(student => {
+        // Ensure roll_number is a string; if missing, use an empty string
+        var roll = student.roll_number ? student.roll_number.toString() : "";
+        return roll.slice(-2);
+    });
+
+    // Extract SGPA values
+    var sgpaValues = topStudents.map(student => student.sgpa);
+
+    // Initialize the line chart on 'highestSgpaChart' canvas
+    var ctx = document.getElementById('highestSgpaChart').getContext('2d');
+
+    // Create a vertical gradient for the fill under the line
+    var gradient = ctx.createLinearGradient(0, 0, 0, 400);
+    gradient.addColorStop(0, 'rgba(75, 192, 192, 0.5)');
+    gradient.addColorStop(1, 'rgba(75, 192, 192, 0.05)');
+
+    // Define custom colors for the top three students
+    var topperColors = ['#FF5733', '#33C3FF', '#75FF33'];
+    var defaultColor = 'rgba(75, 192, 192, 1)';
+
+    // Create the Chart.js line chart
+    var highestSgpaChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Highest SGPA',
+                data: sgpaValues,
+                borderColor: defaultColor,
+                borderWidth: 3,
+                fill: true,
+                backgroundColor: gradient,
+                tension: 0.3, // smooth curve
+                pointBackgroundColor: topStudents.map((student, index) =>
+                    index < 3 ? topperColors[index] : defaultColor
+                ),
+                pointBorderColor: topStudents.map((student, index) =>
+                    index < 3 ? topperColors[index] : '#fff'
+                ),
+                pointRadius: 5,
+                pointHoverRadius: 9,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    align: 'end',
+                    onClick: function (e) {
+                        e.stopPropagation();
+                    },
+                    labels: {
+                        generateLabels: function (chart) {
+                            var legendItems = [];
+                            // Only show legend for top three students
+                            for (var i = 0; i < Math.min(3, topStudents.length); i++) {
+                                var student = topStudents[i];
+                                legendItems.push({
+                                    text: (i + 1) + ". " + student.name,
+                                    fillStyle: topperColors[i],
+                                    hidden: false,
+                                    lineCap: chart.data.datasets[0].borderCapStyle,
+                                    lineDash: chart.data.datasets[0].borderDash,
+                                    lineDashOffset: chart.data.datasets[0].borderDashOffset,
+                                    lineJoin: chart.data.datasets[0].borderJoinStyle,
+                                    strokeStyle: topperColors[i],
+                                    pointStyle: chart.data.datasets[0].pointStyle,
+                                    datasetIndex: 0
+                                });
+                            }
+                            return legendItems;
+                        }
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'SGPA Scores',
+                    font: {
+                        size: 16,
+                        family: 'Helvetica'
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                    titleFont: { size: 16 },
+                    bodyFont: { size: 14 },
+                    callbacks: {
+                        label: function (context) {
+                            var student = topStudents[context.dataIndex];
+                            return student.name + " (" + student.roll_number + "): SGPA " + student.sgpa;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Roll Number (Last 2 Digits)',
+                        font: {
+                            size: 14,
+                            family: 'Helvetica'
+                        }
+                    },
+                    grid: { display: false },
+                    ticks: {
+                        font: { size: 12, family: 'Helvetica' }
+                    }
+                },
+                y: {
+                    min: 4.5,
+                    title: {
+                        display: true,
+                        text: 'SGPA',
+                        font: {
+                            size: 14,
+                            family: 'Helvetica'
+                        }
+                    },
+                    grid: {
+                        color: 'rgba(200, 200, 200, 0.2)'
+                    },
+                    ticks: {
+                        font: { size: 12, family: 'Helvetica' }
+                    }
+                }
+            },
+            layout: { padding: 20 },
+            animation: { duration: 1500, easing: 'easeOutQuart' }
+        }
+    });
+});
+</script>
+
+<!--Pie chart logic here      -->
+<script>
+// Parse the JSON strings passed from Flask
+const labels = JSON.parse('{{ labels | safe }}');
+const dataValues = JSON.parse('{{ data | safe }}');
+
+const ctx = document.getElementById('myPieChart').getContext('2d');
+const myPieChart = new Chart(ctx, {
+    type: 'pie',
+    data: {
+        labels: labels,
+        datasets: [{
+            data: dataValues,
+            backgroundColor: [
+                'rgba(52, 152, 219, 0.8)',  // Blue
+                'rgba(231, 76, 60, 0.8)',   // Red
+                'rgba(46, 204, 113, 0.8)',  // Green
+                'rgba(155, 89, 182, 0.8)'   // Purple
+            ],
+            borderColor: [
+                'rgba(52, 152, 219, 1)',
+                'rgba(231, 76, 60, 1)',
+                'rgba(46, 204, 113, 1)',
+                'rgba(155, 89, 182, 1)'
+            ],
+            borderWidth: 2,
+            hoverOffset: 10
+        }]
+    },
+    options: {
+        responsive: false,
+        plugins: {
+            title: {
+                display: true,
+                text: 'Student SGPA Distribution',
+                font: {
+                    size: 18
+                },
+                color: '#333'
+            },
+            legend: {
+                position: 'bottom',
+                labels: {
+                    font: {
+                        size: 14
+                    },
+                    color: '#333'
+                }
+            },
+            tooltip: {
+                backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                titleFont: {
+                    size: 16,
+                    weight: 'bold'
+                },
+                bodyFont: {
+                    size: 14
+                },
+                padding: 10
+            }
+        },
+        animation: {
+            animateRotate: true,
+            animateScale: true
+        },
+        layout: {
+            padding: 20
+        }
+    }
+});
+</script>
+
+<!--Button's logic       -->
+<script>
+  // Export PDF and Excel functionality
+  $(document).ready(function() {
+    $('#exportPDF').click(function() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a3' });
+      doc.autoTable({ html: '#marksTable', startY: 40 });
+      doc.save("Students_Marks_Table.pdf");
+    });
+
+    $('#exportExcel').click(function() {
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Students Marks');
+      const table = $('#marksTable').DataTable();
+      table.rows().data().each((row) => {
+        worksheet.addRow(row);
+      });
+      workbook.xlsx.writeBuffer().then((buffer) => {
+        saveAs(new Blob([buffer], { type: 'application/octet-stream' }), "Students_Marks.xlsx");
+      });
+    });
+
+    $('#shareBtn').click(function() {
+      if (navigator.share) {
+        navigator.share({
+          title: document.title,
+          text: "Check out this page!",
+          url: window.location.href
+        });
+      } else {
+        navigator.clipboard.writeText(window.location.href).then(() => {
+          alert('URL copied to clipboard!');
+        });
+      }
+    });
+  });
+</script>
+{% endblock %}
+
+

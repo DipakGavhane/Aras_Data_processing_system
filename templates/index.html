@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}This is Home{% endblock %}
+
+{% block content %}
+    {% if current_user.is_authenticated %}
+    <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-6" role="alert">
+      <p class="font-bold">
+        {% if current_user.username == 'admin' %}
+          Welcome, Admin!
+        {% else %}
+          Hello, {{ current_user.username }}!
+        {% endif %}
+      </p>
+      <p>We're glad to have you here. Explore the dashboard to manage your data.</p>
+    </div>
+  {% endif %}
+<main class="flex-1 p-4">
+       <div class="max-w-2xl mx-auto bg-white bg-transparent p-8 rounded-lg shadow-lg" style="margin: 50px auto;">
+        <h1 class="text-3xl font-bold mb-6 text-center">How to Use!</h1>
+        <hr>
+
+        <h2 class="text-2xl font-semibold mb-4">Getting New Data</h2>
+        <ul class="list-decimal list-inside mb-6">
+            <li>First, go to the Add Data tab in the nav bar</li>
+            <li>Fill the form as per the requirements</li>
+            <li>Click on Submit✅</li>
+            <li>Wait for the processing</li>
+        </ul>
+
+        <h2 class="text-2xl font-semibold mb-4">Stored Data</h2>
+        <hr>
+        <ul class="list-decimal list-inside">
+            <li>Click on the Stored Data tab</li>
+            <li>Select the result you want to see📄</li>
+            <li>Wait for the processing</li>
+        </ul>
+    </div>
+
+    <div class="bg-gray-100 text-gray-800 p-6 rounded-lg shadow-md max-w-3xl mx-auto my-8">
+    <h2 class="text-2xl font-semibold text-center mb-3">⚠️ Disclaimer</h2>
+    <hr class="border-t-2 border-gray-300 w-20 mx-auto mb-4">
+    <p class="text-center leading-relaxed">
+        We do not modify, alter, or manipulate any data. Our platform only <strong>fetches bulk student result data directly from university servers</strong>,
+        ensuring that faculty members can access and review student results efficiently. This tool is designed to save time and effort for professors and faculty,
+        making the result retrieval process seamless while maintaining accuracy and integrity.
+    </p>
+</div>
+
+</main>
+{% endblock %}
+

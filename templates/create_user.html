@@ -1,0 +1,25 @@
+<!-- templates/create_user.html -->
+{% extends "base.html" %}
+{% block title %}Create User{% endblock %}
+{% block content %}
+<div class="max-w-md mx-auto bg-white p-8 shadow-md rounded">
+  <h2 class="text-2xl font-bold mb-6 text-center">Create New User</h2>
+  <form method="post">
+    <div class="mb-4">
+      <label for="username" class="block text-gray-700">Username</label>
+      <input type="text" name="username" id="username" class="w-full border rounded p-2" required>
+    </div>
+    <div class="mb-4">
+      <label for="password" class="block text-gray-700">Password</label>
+      <input type="password" name="password" id="password" class="w-full border rounded p-2" required>
+    </div>
+    <div class="mb-4 flex items-center">
+      <input type="checkbox" name="is_admin" id="is_admin" class="mr-2">
+      <label for="is_admin" class="text-gray-700">Grant admin privileges</label>
+    </div>
+    <div class="text-center">
+      <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Create User</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

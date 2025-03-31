@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+
+{% block title %} Add New DataSet {% endblock %}
+
+{% block content %}
+  <div class="flex justify-center my-20">
+    <div class="w-full max-w-lg p-6 bg-white shadow-lg rounded-lg">
+        <form action="/add_data" method="post" class="space-y-4" id="entry_form">
+            <h2 class="text-2xl font-bold mb-6 text-center">Student's Information</h2>
+            <hr>
+
+            <!-- Custom Search Checkbox -->
+            <label class="block text-sm font-medium flex items-center">
+                <input type="checkbox" id="customSearch" class="mr-2">
+                Custom Search (Enter specific roll numbers)
+            </label>
+
+            <!-- Standard Search Fields -->
+            <label for="startRollNumber" class="block text-sm font-medium" id="start_label">Starting Roll Number:</label>
+            <input type="text" id="startRollNumber" name="startRollNumber" pattern="\d{2}[A-Z]{2}\d{6}"
+                placeholder="Ex. 22AK111401" required oninput="calculateTotal()"
+                class="w-full p-2 border rounded-md focus:ring focus:ring-blue-300">
+
+            <label for="endRollNumber" class="block text-sm font-medium" id="end_label">Ending Roll Number:</label>
+            <input type="text" id="endRollNumber" name="endRollNumber" pattern="\d{2}[A-Z]{2}\d{6}"
+                placeholder="Ex. 22AK111450" required oninput="calculateTotal()"
+                class="w-full p-2 border rounded-md focus:ring focus:ring-blue-300">
+
+            <p id="totalCount" class="text-sm font-semibold text-red-500 italic"></p>
+
+            <!-- Custom Roll Number Field (Hidden Initially) -->
+            <label for="customRollNumbers" id="customRollLabel" class="block text-sm font-medium hidden">Enter Roll Numbers (Comma Separated):</label>
+            <input type="text" id="customRollNumbers" name="customRollNumbers"
+                pattern="(\d{2}[A-Z]{2}\d{6},\s*){0,4}\d{2}[A-Z]{2}\d{6}"
+                placeholder="Ex. 22AK111401, 22AK111405"
+                class="w-full p-2 border rounded-md focus:ring focus:ring-blue-300 hidden">
+
+            <!-- Dropdowns -->
+            <label for="course" class="block text-sm font-medium">Course:</label>
+            <select id="course" name="course" class="w-full p-2 border rounded-md focus:ring focus:ring-blue-300" required onchange="updateSemesters()">
+                <option value="" disabled selected>Select</option>
+                <option value="C000012">BCA</option>
+                <option value="C000009">BBA</option>
+<!--                <option value="C000013">BTech</option>-->
+            </select>
+
+            <label for="session" class="block text-sm font-medium">Session:</label>
+            <select id="session" name="session" class="w-full p-2 border rounded-md focus:ring focus:ring-blue-300" required>
+                <option value="" disabled selected>Select Session</option>
+                <option value="SE08">Summer 2018</option>
+                <option value="SE09">Winter 2018</option>
+                <option value="SE10">Summer 2019</option>
+                <option value="SE11">Winter 2019</option>
+                <option value="SE12">Summer 2020</option>
+                <option value="SE13">Winter 2020</option>
+                <option value="SE14">Summer 2021</option>
+                <option value="SE15">Winter 2021</option>
+                <option value="SE16">Summer 2022</option>
+                <option value="SE17">Winter 2022</option>
+                <option value="SE18">Summer 2023</option>
+                <option value="SE19">Winter 2023</option>
+                <option value="SE20">Summer 2024</option>
+                <option value="SE21">Winter 2024</option>
+            </select>
+
+            <label for="semester" class="block text-sm font-medium">Semester:</label>
+            <select id="semester" name="semester" class="w-full p-2 border rounded-md focus:ring focus:ring-blue-300" required>
+                <option value="" disabled selected>Select Semester</option>
+                <option value="SM01">First Semester (Sem - 1)</option>
+                <option value="SM02">Second Semester (Sem - 2)</option>
+                <option value="SM03">Third Semester (Sem - 3)</option>
+                <option value="SM04">Fourth Semester (Sem - 4)</option>
+                <option value="SM05">Fifth Semester (Sem - 5)</option>
+                <option value="SM06">Sixth Semester (Sem - 6)</option>
+                <option value="SM07">Seventh Semester (Sem - 7)</option>
+                <option value="SM08">Eighth Semester (Sem - 8)</option>
+            </select>
+
+            <label for="resultType" class="block text-sm font-medium">Result Type:</label>
+            <select id="resultType" name="resultType" class="w-full p-2 border rounded-md focus:ring focus:ring-blue-300" required>
+                <option value="" disabled selected>Select Result Type</option>
+                <option value="R">Regular</option>
+                <option value="B">Back</option>
+                <option value="RV">Reval</option>
+                <option value="EV">EVS</option>
+            </select>
+
+            <button type="submit" id="submitBtn" class="w-full p-3 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50">
+                Submit
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+
+    function calculateTotal() {
+        let startRoll = document.getElementById('startRollNumber').value;
+        let endRoll = document.getElementById('endRollNumber').value;
+        let totalCountElement = document.getElementById('totalCount');
+        let submitButton = document.getElementById('submitBtn');
+
+        if (startRoll.length === 10 && endRoll.length === 10) {
+            let startNum = parseInt(startRoll.slice(-3));
+            let endNum = parseInt(endRoll.slice(-3));
+
+            if (!isNaN(startNum) && !isNaN(endNum) && endNum >= startNum) {
+                let total = endNum - startNum + 1;
+                totalCountElement.textContent = `Total Students: ${total}`;
+                submitButton.disabled = false;
+            } else {
+                totalCountElement.textContent = "Invalid range!";
+                submitButton.disabled = true;
+            }
+        } else {
+            totalCountElement.textContent = "";
+            submitButton.disabled = true;
+        }
+    }
+
+    document.getElementById('customSearch').addEventListener('change', function () {
+        let isChecked = this.checked;
+
+        let startRoll = document.getElementById('startRollNumber');
+        let endRoll = document.getElementById('endRollNumber');
+        let startRoll_label = document.getElementById('start_label');
+        let endRoll_label = document.getElementById('end_label');
+        let totalCount_label = document.getElementById('totalCount');
+
+        let customRollInput = document.getElementById('customRollNumbers');
+        let customRollLabel = document.getElementById('customRollLabel');
+
+        if (isChecked) {
+           // startRoll.disabled = true;
+           // endRoll.disabled = true;
+            startRoll.classList.add('hidden')
+            endRoll.classList.add('hidden')
+
+            startRoll.value = '';
+            endRoll.value = '';
+            totalCount.textContent = '';  // Clear the text inside the <p> tag
+
+            startRoll_label.classList.add('hidden')
+            endRoll_label.classList.add('hidden')
+            totalCount_label.classList.add('hidden')
+
+            customRollInput.classList.remove('hidden');
+            customRollLabel.classList.remove('hidden');
+            startRoll.removeAttribute('required');
+            endRoll.removeAttribute('required');
+            customRollInput.setAttribute('required', 'required');
+        }
+        else {
+            startRoll.classList.remove('hidden')
+            endRoll.classList.remove('hidden')
+
+            startRoll_label.classList.remove('hidden')
+            endRoll_label.classList.remove('hidden')
+            totalCount_label.classList.remove('hidden')
+
+            customRollInput.value = '';
+            customRollInput.classList.add('hidden');
+            customRollLabel.classList.add('hidden');
+            startRoll.setAttribute('required', 'required');
+            endRoll.setAttribute('required', 'required');
+            customRollInput.removeAttribute('required');
+        }
+    });
+
+    function updateSemesters() {
+        let course = document.getElementById('course').value;
+        let semesterSelect = document.getElementById('semester');
+        semesterSelect.innerHTML = '';
+
+        let totalSemesters = course === 'C000013' ? 8 : (course === 'C000012' || course === 'C000009' ? 6 : 0);
+
+        let optionsHTML = '<option value="" disabled selected>Select Semester</option>';
+        for (let i = 1; i <= totalSemesters; i++) {
+            let semesterText = `${['First', 'Second', 'Third', 'Fourth', 'Fifth', 'Sixth', 'Seventh', 'Eighth'][i - 1]} Semester (Sem - ${i})`;
+            optionsHTML += `<option value="SM0${i}">${semesterText}</option>`;
+        }
+        semesterSelect.innerHTML = optionsHTML;
+    }
+</script>
+{% endblock %}
+

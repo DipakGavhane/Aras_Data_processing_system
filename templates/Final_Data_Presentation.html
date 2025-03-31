@@ -1,0 +1,572 @@
+{% extends "base.html" %}
+
+{% block title %}Students Marks Table{% endblock %}
+
+
+{% block links %}
+  <!-- DataTables CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  <script src="{{ url_for('static', filename='js/datasheet.js') }}"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+
+{% block content %}
+<div class="bg-gray-100 p-8 py-11">
+  <div class="mx-auto bg-white p-6 rounded-lg shadow-md">
+      <!-- Batch Information Header -->
+      <div class="mb-6">
+          <h2 class="text-2xl font-bold">{{ batch.course_name }} - {{ batch.semester }}</h2>
+          <p class="text-gray-600">
+            Session: {{ batch.session }} | Type: {{ batch.type.value|title }} | Uploaded: {{ batch.timestamp.strftime('%d-%b-%Y %H:%M') }}
+          </p>
+      </div>
+
+    <!-- Tabs -->
+    <div class="flex border-b">
+        <button
+            class="tab-btn px-4 py-2 text-gray-600 hover:text-blue-600 border-b-2 border-transparent hover:border-blue-600 active"
+            onclick="switchTab(event, 'tableView')">
+            Table View
+        </button>
+        <button
+            class="tab-btn px-4 py-2 text-gray-600 hover:text-blue-600 border-b-2 border-transparent hover:border-blue-600"
+            onclick="switchTab(event, 'resultView')">
+            Result View (SGPA)
+        </button>
+        <button
+            class="tab-btn px-4 py-2 text-gray-600 hover:text-blue-600 border-b-2 border-transparent hover:border-blue-600"
+            onclick="switchTab(event, 'moreView')">
+            Overall
+        </button>
+    </div>
+
+    <!-- Table View Tab -->
+    <div id="tableView" class="tab-content p-5 active overflow-x-auto">
+<!--        <h3 class="text-xl font-bold mb-2">Table View</h3>-->
+        <table id="marksTable">
+            <colgroup>
+                <col style="width: 60px;"> <!-- Sr. NO.-->
+                <col style="width: 100px;"> <!-- Name -->
+                <col style="width: 113px;"> <!-- Roll Number -->
+                <col style="width: 95px;"> <!-- College Code -->
+                <col style="width: 108px;"> <!-- Semester -->
+                {% for subject in subject_list %}
+                <col style="width: 65px;"> <!-- Internal Max -->
+                <col style="width: 65px;"> <!-- Internal Score -->
+                <col style="width: 65px;"> <!-- Theory Max -->
+                <col style="width: 65px;"> <!-- Theory Score -->
+                {% endfor %}
+                <col style="width: 85px;"> <!-- Result -->
+                <col style="width: 80px;"> <!-- SGPA -->
+            </colgroup>
+            <thead style="font-size: medium;">
+                <tr>
+                    <th rowspan="3" class="small_text">Sr. No.</th>
+                    <th rowspan="3">Name</th>
+                    <th rowspan="3">Roll Number</th>
+                    <th rowspan="3">College Code</th>
+                    <th rowspan="3">Semester</th>
+                    {% for subject in subject_list %}
+                    <th colspan="4" {% if not loop.last %}class="subject-separator" {% endif %}>
+                        {{ subject }}
+                    </th>
+                    {% endfor %}
+                    <th rowspan="3">Result</th>
+                    <th rowspan="3">SGPA</th>
+                </tr>
+                <tr>
+                    {% for subject in subject_list %}
+                    <th colspan="2" class="small_text">Internal</th>
+                    <th colspan="2" class="small_text {% if not loop.last %}subject-separator{% endif %}">Theory
+                    </th>
+                    {% endfor %}
+                </tr>
+                <tr>
+                    {% for subject in subject_list %}
+                    <th class="micro_text">Max</th>
+                    <th class="micro_text">Score</th>
+                    <th class="micro_text">Max</th>
+                    <th class="micro_text {% if not loop.last %}subject-separator{% endif %}">Score</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody style="font-size: medium;">
+                {% for student in students %}
+                <tr>
+                    <td>{{ loop.index }}.</td>
+                    <td class="small_text name-column" title="{{ student.name }}">
+                        {% if student.name %}
+                        {% set name_words = student.name.split(' ') %}
+                        {{ name_words[:3] | join(' ') }}
+                        {% else %}
+                        No name provided
+                        {% endif %}
+                    </td>
+                    <td>{{ student.roll_number }}</td>
+                    {% if student.college_code != None %}
+                    <td>{{ student.college_code[3:6] }}...</td>
+                    {% else %}
+                    <td>{{ student.college_code }}...</td>
+                    {% endif %}
+                    <td class="small_text">{{ student.semester }}</td>
+                    {% for subject in subject_list %}
+                    {% if subject in student.subjects %}
+                    <td>{{ student.subjects[subject].internal_max }}</td>
+                    <td>{{ student.subjects[subject].internal_obtain }}</td>
+                    <td>{{ student.subjects[subject].theory_max }}</td>
+                    <td {% if not loop.last %}class="subject-separator" {% endif %}>
+                        {{ student.subjects[subject].theory_obtain }}
+                    </td>
+                    {% else %}
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td {% if not loop.last %}class="subject-separator" {% endif %}></td>
+                    {% endif %}
+                    {% endfor %}
+                    <td>{{ student.result }}</td>
+                    <td>{{ student.sgpa }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="flex justify-between m-4">
+            <button id="exportPDF" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md">Download as
+                PDF</button>
+
+            <button id="exportExcel" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md">Download as
+                Sheet</button>
+
+            <button id="shareBtn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md">
+                Share This Page</button>
+
+            <button id="deleteAllBtn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md">Delete All
+                Records</button>
+        </div>
+    </div>
+
+
+    <!-- Data visualization Tab -->
+    <div id="resultView" class="tab-content p-4 hidden">
+        <!-- <h3 class="text-xl font-bold mb-2">Result View</h3> -->
+        <!-- Add canvas for Chart.js -->
+        <canvas id="highestSgpaChart" width="400" height="200"></canvas>
+    </div>
+
+
+
+    <div id="moreView" class="tab-content p-4 hidden">
+        <h3 class="text-xl font-bold mb-2">More</h3>
+        <p>Additional details will go here.</p>
+    </div>
+</div>
+
+
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+
+<script>
+    // Initialize DataTable
+    $('#marksTable').DataTable({
+        paging: true,
+        searching: true,
+        ordering: true,
+    });
+
+    // Delete All button click event
+    $('#deleteAllBtn').click(function() {
+        if (confirm('Are you sure you want to delete all records? This action cannot be undone!')) {
+        $.ajax({
+            url: '/delete_all',
+            type: 'POST',
+            success: function(response) {
+            alert(response.message);
+            location.reload();
+            },
+            error: function(xhr, status, error) {
+            alert('Error deleting records: ' + error);
+            }
+        });
+        }
+    });
+
+    function switchTab(event, tabId) {
+        // Hide all content
+        document.querySelectorAll('.tab-content').forEach(tab => {
+            tab.classList.add('hidden');
+        });
+
+        // Remove active styles from all tabs
+        document.querySelectorAll('.tab-btn').forEach(tab => {
+            tab.classList.remove('text-blue-600', 'border-blue-600');
+            tab.classList.add('text-gray-600', 'border-transparent');
+        });
+
+        // Show the selected tab content
+        document.getElementById(tabId).classList.remove('hidden');
+
+        // Mark clicked tab as active
+        event.currentTarget.classList.add('text-blue-600', 'border-blue-600');
+
+    }
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Get students data passed from the server as JSON
+        var studentsRawData = {{ students|tojson }};
+
+        // Preprocess student data to ensure no missing values
+        var StudentsData = studentsRawData
+          .filter(student => student.sgpa != null && student.roll_number != null && student.name != null)
+          .map(student => {
+            return {
+              name: student.name || "Unknown",
+              roll_number: student.roll_number || "NA",
+              sgpa: student.sgpa
+            };
+          });
+
+        // Sort students by sgpa in descending order (if desired)
+        StudentsData.sort((a, b) => b.sgpa - a.sgpa);
+
+        // Use all students instead of slicing
+        var topStudents = StudentsData;
+
+        var labels = topStudents.map(student => student.roll_number.toString().slice(-2));
+        var sgpaValues = topStudents.map(student => student.sgpa);
+
+
+        // Get the canvas context and initialize the Chart
+        var ctx = document.getElementById('highestSgpaChart').getContext('2d');
+
+        // Create a vertical gradient for the fill under the line
+        var gradient = ctx.createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, 'rgba(75, 192, 192, 0.5)');
+        gradient.addColorStop(1, 'rgba(75, 192, 192, 0.05)');
+
+        // Define custom colors for the top three students
+        var topperColors = ['#FF5733', '#33C3FF', '#75FF33'];  // Colors for 1st, 2nd, 3rd rankers
+        var defaultColor = 'rgba(75, 192, 192, 1)';  // Default color for other students
+
+        var highestSgpaChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: topStudents.map(student => student.roll_number.toString().slice(-2)),
+                datasets: [{
+                    label: 'Highest SGPA',
+                    data: topStudents.map(student => student.sgpa),
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 3,
+                    fill: true,
+                    backgroundColor: gradient,
+                    tension: 0.3, // smooth curve
+                    pointBackgroundColor: topStudents.map((student, index) => index < 3 ? topperColors[index] : defaultColor), // Top 3 get different colors
+                    pointBorderColor: topStudents.map((student, index) => index < 3 ? topperColors[index] : '#fff'),
+                    pointRadius: 5,
+                    // pointRadius: topStudents.map((student, index) => index < 3 ? 7 : 5),  // Make toppers' points slightly larger
+                    pointHoverRadius: 9,
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top', // Places the legend on the right
+                        align: 'end',    // aligns legend items to the right (end)
+
+                        // Disable default onClick behavior if desired
+                        onClick: function(e) {
+                            e.stopPropagation();
+                        },
+
+                        labels: {
+                            // Custom legend items for the first three students
+                            generateLabels: function(chart) {
+                                var legendItems = [];
+                                // Loop through the first three students (or fewer if not available)
+                                for (var i = 0; i < Math.min(3, topStudents.length); i++) {
+                                    var student = topStudents[i];
+                                    legendItems.push({
+                                        text: (i + 1) + ". " + student.name,
+                                        fillStyle: topperColors[i], // You can customize the color
+                                        hidden: false,
+                                        // Copy styling from the dataset for consistency
+                                        lineCap: chart.data.datasets[0].borderCapStyle,
+                                        lineDash: chart.data.datasets[0].borderDash,
+                                        lineDashOffset: chart.data.datasets[0].borderDashOffset,
+                                        lineJoin: chart.data.datasets[0].borderJoinStyle,
+                                        strokeStyle: topperColors[i],
+                                        pointStyle: chart.data.datasets[0].pointStyle,
+                                        datasetIndex: 0
+                                    });
+                                }
+                                return legendItems;
+                            }
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'SGPA Scores',
+                        font: {
+                            size: 16,
+                            family: 'Helvetica'
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                        titleFont: { size: 16 },
+                        bodyFont: { size: 14 },
+                        callbacks: {
+                            label: function(context) {
+                                // Get the student corresponding to this data point
+                                var student = topStudents[context.dataIndex];
+                                return student.name + " (" + student.roll_number + "): SGPA " + student.sgpa;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Roll Number (Last 2 Digits)',  // X-axis title
+                            font: {
+                                size: 14,
+                                family: 'Helvetica'
+                            }
+                        },
+                        grid: { display: false },
+                        ticks: {
+                            font: { size: 12, family: 'Helvetica' }
+                        }
+                    },
+                    y: {
+                        min: 4.5,
+                        // max: 10,
+                        title: {
+                            display: true,
+                            text: 'SGPA',  // Y-axis title
+                            font: {
+                                size: 14,
+                                family: 'Helvetica'
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(200, 200, 200, 0.2)'
+                        },
+                        ticks: {
+                            font: {
+                                size: 12,
+                                family: 'Helvetica'
+                            }
+                        }
+                    }
+                },
+                layout: {
+                    padding: 20,
+
+                },
+                animation: {
+                    duration: 1500,
+                    easing: 'easeOutQuart'
+                }
+            }
+        });
+    });
+</script>
+
+<script>
+    $(document).ready(function() {
+
+        // Export PDF button click event using jsPDF
+        $('#exportPDF').click(function () {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({
+              orientation: "landscape",
+              unit: "pt",
+              format: 'a3'
+            });
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(12);
+            doc.text("Students Marks Table", 40, 30);
+            doc.autoTable({
+              html: '#marksTable',
+              startY: 40,
+              theme: 'grid',
+              styles: { fontSize: 9, cellPadding: 4, valign: 'middle', halign: 'center' },
+              headStyles: { fillColor: [41, 128, 185], textColor: [255, 255, 255], fontSize: 10 },
+              alternateRowStyles: { fillColor: [240, 240, 240] },
+              margin: { top: 40, left: 20, right: 20 },
+              tableWidth: 'wrap'
+            });
+            doc.save("Students_Marks_Table.pdf");
+        });
+
+
+        $('#shareBtn').click(function () {
+            const shareData = {
+              title: document.title,
+              text: "Check out this page!",
+              url: window.location.href
+            };
+
+            if (navigator.share) {
+              navigator.share(shareData)
+                .then(() => console.log('Page shared successfully'))
+                .catch((error) => console.error('Error sharing', error));
+            } else {
+              // Fallback: copy the URL to clipboard
+              if (navigator.clipboard) {
+                navigator.clipboard.writeText(window.location.href)
+                  .then(() => alert('URL copied to clipboard!'))
+                  .catch((error) => alert('Unable to copy URL: ' + error));
+              } else {
+                // If Clipboard API is not available, simply alert the URL
+                prompt('Copy this URL:', window.location.href);
+              }
+            }
+        });
+
+        // Export Excel button click event using SheetJS
+        $('#exportExcel').click(function () {
+            console.log("Export to Excel clicked");
+
+           // Get subject list from template as a JSON array
+            var subject_list = {{ subject_list|tojson }};
+
+            // Create workbook and worksheet
+            var workbook = new ExcelJS.Workbook();
+            var worksheet = workbook.addWorksheet('Students Marks');
+            console.log("Workbook and worksheet created");
+
+            // --- Manually Build Header Rows (Rows 1-3) ---
+
+            // Row 1: Fixed columns and subject titles
+            var headerRow1 = worksheet.getRow(1);
+            headerRow1.getCell(1).value = "Sr. No.";
+            headerRow1.getCell(2).value = "Name";
+            headerRow1.getCell(3).value = "Roll Number";
+            headerRow1.getCell(4).value = "College Code";
+            headerRow1.getCell(5).value = "Semester";
+            // Merge these fixed header cells vertically (rows 1-3)
+            worksheet.mergeCells(1, 1, 3, 1);
+            worksheet.mergeCells(1, 2, 3, 2);
+            worksheet.mergeCells(1, 3, 3, 3);
+            worksheet.mergeCells(1, 4, 3, 4);
+            worksheet.mergeCells(1, 5, 3, 5);
+
+            // Starting column for subjects is column 6
+            var startCol = 6;
+            for (var i = 0; i < subject_list.length; i++) {
+              var cell = headerRow1.getCell(startCol + i * 4);
+              cell.value = subject_list[i];
+              // Each subject title spans 4 columns
+              worksheet.mergeCells(1, startCol + i * 4, 1, startCol + i * 4 + 3);
+            }
+            // Add "Result" column after subjects
+            var resultCol = startCol + subject_list.length * 4;
+            headerRow1.getCell(resultCol).value = "Result";
+            worksheet.mergeCells(1, resultCol, 3, resultCol);
+            // Add "SGPA" column next
+            var sgpaCol = resultCol + 1;
+            headerRow1.getCell(sgpaCol).value = "SGPA";
+            worksheet.mergeCells(1, sgpaCol, 3, sgpaCol);
+
+            // Row 2: For each subject, create two groups: "Internal" and "Theory"
+            var headerRow2 = worksheet.getRow(2);
+            for (var i = 0; i < subject_list.length; i++) {
+              var baseCol = startCol + i * 4;
+              // "Internal" spans first 2 columns
+              headerRow2.getCell(baseCol).value = "Internal";
+              worksheet.mergeCells(2, baseCol, 2, baseCol + 1);
+              // "Theory" spans next 2 columns
+              headerRow2.getCell(baseCol + 2).value = "Theory";
+              worksheet.mergeCells(2, baseCol + 2, 2, baseCol + 3);
+            }
+            // Row 3: Detailed column headers for each subject
+            var headerRow3 = worksheet.getRow(3);
+            for (var i = 0; i < subject_list.length; i++) {
+              var baseCol = startCol + i * 4;
+              headerRow3.getCell(baseCol).value = "Max";
+              headerRow3.getCell(baseCol + 1).value = "Score";
+              headerRow3.getCell(baseCol + 2).value = "Max";
+              headerRow3.getCell(baseCol + 3).value = "Score";
+            }
+
+            // Apply borders and center alignment to header rows
+            [headerRow1, headerRow2, headerRow3].forEach(function (row) {
+              row.eachCell(function (cell) {
+                cell.border = {
+                  top: { style: 'thin' },
+                  left: { style: 'thin' },
+                  bottom: { style: 'thin' },
+                  right: { style: 'thin' }
+                };
+                cell.alignment = { vertical: 'middle', horizontal: 'center' };
+              });
+              row.commit();
+            });
+            console.log("Header rows processed");
+
+            // --- Process Data Rows ---
+            // Data rows from the HTML table's <tbody>
+            var table = document.getElementById('marksTable');
+            if (!table) {
+              console.error("Table element not found!");
+              return;
+            }
+            var tbody = table.tBodies[0];
+            var dataRows = tbody ? tbody.rows : [];
+            // Data rows in Excel will start from row 4
+            var excelRowIndex = 4;
+            for (var i = 0; i < dataRows.length; i++) {
+              var htmlRow = dataRows[i];
+              var excelRow = worksheet.getRow(excelRowIndex++);
+              // Loop through each cell in the HTML row (assumed to be simple, without complex merges)
+              for (var j = 0; j < htmlRow.cells.length; j++) {
+                var cell = excelRow.getCell(j + 1);
+                cell.value = htmlRow.cells[j].innerText.trim();
+                cell.border = {
+                  top: { style: 'thin' },
+                  left: { style: 'thin' },
+                  bottom: { style: 'thin' },
+                  right: { style: 'thin' }
+                };
+                cell.alignment = { vertical: 'middle', horizontal: 'center' };
+              }
+              excelRow.commit();
+            }
+            console.log("Data rows processed, adjusting column widths");
+
+            // Optionally adjust column widths
+            worksheet.columns.forEach(function (column) {
+              column.width = 15; // Adjust as needed
+            });
+
+            console.log("Writing workbook to buffer");
+            // Export the workbook using FileSaver
+            workbook.xlsx.writeBuffer().then(function (buffer) {
+              console.log("Buffer written, saving file");
+              saveAs(new Blob([buffer], { type: "application/octet-stream" }), "Students_Marks.xlsx");
+            }).catch(function (err) {
+              console.error("Error writing workbook:", err);
+            });
+          });
+
+    });
+</script>
+
+</div>
+{% endblock %}

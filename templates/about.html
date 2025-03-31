@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}About Us{% endblock %}
+
+{% block content %}
+<section class="text-gray-800 body-font bg-gray-100">
+    <div class="container px-5 py-24 mx-auto">
+        <div class="flex flex-wrap -mx-4 justify-center">
+            <!-- Team Member: Dipak Gavhane -->
+            <div class="sm:w-1/3 mb-10 px-4">
+                <div class="rounded-lg overflow-hidden group">
+                    <img alt="Dipak Gavhane"
+                        class="object-cover object-center h-55 w-60 rounded-full transition-transform duration-300 group-hover:scale-105 mx-auto"
+                        src="{{ url_for('static', filename='images/dipak_1.jpg') }}">
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 mt-6 mb-3 text-center">Dipak Gavhane</h2>
+                <hr class="border-gray-300">
+                <p class="text-base text-gray-700 text-center font-semibold mt-3">
+                    Contribution in backend and database of the project
+                </p>
+                <p class="text-center text-gray-700 font-semibold">Technologies: Python, Flask, SQL, Selenium, BeautifulSoup</p>
+            </div>
+
+            <!-- Team Member: Jay Kokarde -->
+            <div class="sm:w-1/3 mb-10 px-4">
+                <div class="rounded-lg overflow-hidden group">
+                    <img alt="Jay Kokarde"
+                        class="object-cover object-center h-55 w-60 rounded-full transition-transform duration-300 group-hover:scale-105 mx-auto"
+                        src="{{ url_for('static', filename='images/jay.jpg') }}">
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 mt-6 mb-3 text-center">Jay Kokarde</h2>
+                <hr class="border-gray-300">
+                <p class="text-base text-gray-700 text-center font-semibold mt-3">
+                    Contributed in Synopsis and Documentation preparation for the project
+                </p>
+            </div>
+
+            <!-- Team Member: Krishna Agrawal -->
+            <div class="sm:w-1/3 mb-10 px-4">
+                <div class="rounded-lg overflow-hidden group">
+                    <img alt="Krishna Agrawal"
+                        class="object-cover object-center h-55 w-60 rounded-full transition-transform duration-300 group-hover:scale-105 mx-auto"
+                        src="{{ url_for('static', filename='images/krishna.jpg') }}">
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 mt-6 mb-3 text-center">Krishna Agrawal</h2>
+                <hr class="border-gray-300">
+                <p class="text-base text-gray-700 text-center font-semibold mt-3">
+                    Contributed in the development of frontend
+                </p>
+                <p class="text-center text-gray-700 font-semibold">Technologies: HTML, CSS, Tailwind</p>
+            </div>
+        </div>
+
+        <!-- About Us Section -->
+        <div class="max-w-4xl mx-auto bg-white text-gray-800 p-8 rounded-lg shadow-lg mt-10">
+            <h1 class="text-4xl font-bold text-center mb-6">About Us</h1>
+            <hr class="border-gray-300">
+            <p class="text-lg text-center mb-6">
+                We are a dedicated group of three BCA final-year students united by our passion for technology and innovation.
+                Each of us contributes unique expertise to bring this project to life.
+            </p>
+            <ul class="text-lg mb-6">
+                <li class="text-center mb-4 p-2 rounded-lg">
+                    <span class="font-semibold">Frontend Developer:</span> Designs the user interface and ensures an intuitive experience.
+                </li>
+                <li class="text-center mb-4 p-2 rounded-lg">
+                    <span class="font-semibold">Backend Developer:</span> Develops the server-side logic and manages the database.
+                </li>
+                <li class="text-center mb-4 p-2 rounded-lg">
+                    <span class="font-semibold">Documentation Specialist:</span> Manages project documentation, ensuring clarity and comprehensiveness.
+                </li>
+            </ul>
+
+            <h1 class="text-4xl font-bold text-center mb-6">Our Project</h1>
+            <hr class="border-gray-300">
+            <p class="text-lg text-center">
+                Our project simplifies the process of retrieving and storing university results. By automatically fetching results from the university website
+                and securely storing them in a database, we provide faculty with easy and reliable access to their students' academic performance.
+            </p>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+

@@ -1,0 +1,57 @@
+main {
+    height: 100%;
+}
+
+#marksTable {
+    zoom: 68%;
+}
+
+#entry_form {
+    zoom: 90%;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    table-layout: fixed;
+    /* Enforces the column widths */
+}
+
+
+th,
+td {
+    padding: 8px;
+    text-align: center;
+    border: 1px solid #ddd;
+    word-wrap: break-word;
+    /* Prevents overflow */
+}
+
+th {
+    background-color: #f2f2f2;
+}
+
+.micro_text {
+    font-size: x-small;
+}
+
+.small_text {
+    font-size: small;
+}
+
+/* Custom separator style for the right border between subject groups */
+.subject-separator {
+    border-right: 2px solid #000 !important;
+}
+
+.name-column {
+    height: 40px;
+    /* Fixed height */
+    overflow: hidden;
+    /* Hide text that exceeds the fixed height */
+    text-overflow: ellipsis;
+    /* Optionally show an ellipsis for truncated text */
+    white-space: nowrap;
+    /* Prevent text from wrapping to multiple lines */
+}
+

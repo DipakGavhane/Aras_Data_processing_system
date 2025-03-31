@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{% endblock %}</title>
+  {% block links %}{% endblock %}
+
+  <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+
+<body class="bg-gray-100 text-gray-800 flex flex-col min-h-screen">
+
+<nav class="bg-gray-900 p-4 shadow-md w-full">
+  <div class="container mx-auto flex justify-between items-center">
+    <!-- Logo -->
+    <a href="{{ url_for('home') }}" class="flex items-center">
+      <img src="{{ url_for('static', filename='images/Logo.png') }}" alt="Website Logo" class="h-14 w-auto">
+    </a>
+
+
+    <!-- Navigation Links (Centered) -->
+    <ul id="menu"
+        class="hidden md:flex md:space-x-6 absolute md:static bg-gray-900 md:bg-transparent w-full left-0 top-16 md:top-0 md:w-auto flex-col md:flex-row text-center md:text-center transition-all duration-300 ease-in-out opacity-0 md:opacity-100 scale-95 md:scale-100">
+      <li><a href="{{ url_for('home') }}"
+             class="block py-2 px-4 text-gray-300 hover:text-white transition duration-300">Home</a></li>
+
+      <li><a href="{{ url_for('add') }}"
+             class="block py-2 px-4 text-gray-300 hover:text-white transition duration-300">Add Data</a></li>
+
+      <li><a href="{{ url_for('available_data_cards') }}"
+             class="block py-2 px-4 text-gray-300 hover:text-white transition duration-300">Stored Data</a></li>
+
+      <li><a href="{{ url_for('goal') }}"
+             class="block py-2 px-4 text-gray-300 hover:text-white transition duration-300">Our Goal</a></li>
+
+      <li><a href="{{ url_for('about_us') }}"
+             class="block py-2 px-4 text-gray-300 hover:text-white transition duration-300">About Us</a></li>
+
+      <!-- Login & Register inside dropdown for mobile -->
+      <div class="md:hidden flex flex-col space-y-2 mt-2">
+        <a href="login.html"
+          class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition duration-300">
+          Login
+        </a>
+      </div>
+    </ul>
+    <!-- Right Section: Login/Logout & Admin Dropdown -->
+    <div class="hidden md:flex space-x-4 items-center">
+      {% if not current_user.is_authenticated %}
+        <a href="{{ url_for('login') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition duration-300">
+          Login
+        </a>
+      {% else %}
+        {% if current_user.username == 'admin' %}
+          <div class="relative inline-block text-left">
+            <button type="button" id="admin-menu-btn"
+                    class="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-gray-800 text-sm font-medium text-white hover:bg-gray-700 focus:outline-none"
+                    aria-expanded="false" aria-haspopup="true">
+              Admin Menu
+              <svg class="-mr-1 ml-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                   stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            <!-- Dropdown panel -->
+            <div id="admin-dropdown"
+                 class="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 hidden">
+              <div class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="admin-menu-btn">
+                <a href="{{ url_for('create_user') }}"
+                   class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
+                  Register New User
+                </a>
+                <a href="{{ url_for('admin_dashboard') }}"
+                   class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
+                  Manage Users
+                </a>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+        <a href="{{ url_for('logout') }}" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md transition duration-300">
+          Logout
+        </a>
+      {% endif %}
+    </div>
+
+    <!-- Hamburger Icon (Mobile) -->
+    <button id="menu-toggle" class="text-white md:hidden focus:outline-none" aria-expanded="false">
+      <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+      </svg>
+    </button>
+  </div>
+</nav>
+
+
+  <!-- JavaScript for Mobile Menu Toggle with Animation -->
+  <script>
+    document.getElementById('menu-toggle').addEventListener('click', function () {
+      const menu = document.getElementById('menu');
+      menu.classList.toggle('hidden');
+
+      if (!menu.classList.contains('hidden')) {
+        menu.classList.remove('opacity-0', 'scale-95');
+        menu.classList.add('opacity-100', 'scale-100');
+      } else {
+        menu.classList.remove('opacity-100', 'scale-100');
+        menu.classList.add('opacity-0', 'scale-95');
+      }
+    });
+    document.getElementById('admin-menu-btn').addEventListener('click', function() {
+        const dropdown = document.getElementById('admin-dropdown');
+        dropdown.classList.toggle('hidden');
+    });
+  </script>
+
+  <main class="flex-1 container mx-auto py-6">
+  {% block content %}{% endblock %}
+  </main>
+
+ <footer class="bg-gray-900 text-white py-10 mt-auto">
+    <div class="container mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 px-6">
+      <!-- About Section -->
+      <div>
+        <h2 class="text-xl font-semibold mb-3">About Us</h2>
+        <p class="text-sm text-gray-300">Automation Tool is designed to simplify your workflow, providing advanced
+          solutions for automated data extraction, processing, and visualization.</p>
+      </div>
+
+      <!-- Contact Section -->
+      <div>
+        <h2 class="text-xl font-semibold mb-3">Contact Us</h2>
+        <ul class="text-sm text-gray-300">
+          <li>Email: <a href="mailto:krishna710agrawal@gmail.com"
+              class="hover:underline">krishna710agrawal@gmail.com</a></li>
+          <li>Phone: <a href="tel:+917758956262" class="hover:underline">+91 7758956262</a></li>
+          <li>Location: Maharashtra, India</li>
+        </ul>
+      </div>
+
+      <!-- Quick Links -->
+      <div>
+        <h2 class="text-xl font-semibold mb-3">Quick Links</h2>
+        <ul class="text-sm text-gray-300 space-y-2">
+          <li><a href="{{ url_for('home') }}" class="hover:text-gray-400 transition">Home</a></li>
+          <li><a href="{{ url_for('add') }}" class="hover:text-gray-400 transition">Add Data</a></li>
+          <li><a href="{{ url_for('available_data_cards') }}" class="hover:text-gray-400 transition">Stored Data</a></li>
+          <li><a href="{{ url_for('goal') }}" class="hover:text-gray-400 transition">Our Goal</a></li>
+          <li><a href="{{ url_for('about_us') }}" class="hover:text-gray-400 transition">About Us</a></li>
+        </ul>
+      </div>
+
+      <!-- Social Media Section -->
+      <div class="text-center sm:text-left">
+        <h2 class="text-xl font-semibold mb-3">Follow Us</h2>
+        <div class="flex justify-center sm:justify-start gap-4">
+          <a href="#" class="hover:text-blue-400 transition"><svg class="w-6 h-6" fill="currentColor"
+              viewBox="0 0 24 24">
+              <path
+                d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.879v-6.988H7.89V12h2.548V9.797c0-2.514 1.492-3.89 3.777-3.89 1.095 0 2.239.195 2.239.195v2.462H15.56c-1.235 0-1.618.768-1.618 1.556V12h2.751l-.44 2.891h-2.311v6.988C18.343 21.128 22 16.991 22 12z" />
+            </svg></a>
+          <a href="#" class="hover:text-blue-500 transition"><svg class="w-6 h-6" fill="currentColor"
+              viewBox="0 0 24 24">
+              <path
+                d="M22.46 6c-.77.35-1.6.58-2.46.69.89-.53 1.57-1.36 1.89-2.35-.83.49-1.74.85-2.72 1.05a4.14 4.14 0 00-7.05 3.77A11.73 11.73 0 013 5.64a4.15 4.15 0 001.28 5.54c-.66-.02-1.28-.2-1.83-.5v.05c0 2.08 1.48 3.82 3.45 4.21-.36.1-.74.16-1.13.16-.28 0-.54-.03-.8-.08.54 1.69 2.1 2.92 3.95 2.95a8.3 8.3 0 01-5.13 1.77c-.34 0-.67-.02-1-.06a11.72 11.72 0 006.33 1.86c7.59 0 11.74-6.29 11.74-11.74v-.53c.81-.58 1.52-1.3 2.08-2.12z" />
+            </svg></a>
+          <a href="#" class="hover:text-blue-600 transition"><svg class="w-6 h-6" fill="currentColor"
+              viewBox="0 0 24 24">
+              <path
+                d="M22 3c-1 .46-2 .77-3 1A4.5 4.5 0 0017 2c-2.5 0-4.5 2-4.5 4.5v1A9.5 9.5 0 013 4a4.5 4.5 0 001.39 6A4.5 4.5 0 012 9v.5C2 13 4 15 6.5 15c-.5.1-1 .15-1.5.15a7 7 0 01-1-.08 4.5 4.5 0 004.2 3c-3 2.35-6.5 3.5-10 3a13.5 13.5 0 007.5 2.2c9 0 14-7.5 14-14v-.6A9.8 9.8 0 0022 3z" />
+            </svg></a>
+          <a href="#" class="hover:text-gray-400 transition"><svg class="w-6 h-6" fill="currentColor"
+              viewBox="0 0 24 24">
+              <path
+                d="M12 .297c-6.63 0-12 5.373-12 12 0 5.302 3.438 9.8 8.205 11.385.6.11.82-.26.82-.58v-2.02c-3.34.72-4.04-1.58-4.04-1.58-.54-1.36-1.34-1.72-1.34-1.72-1.09-.74.08-.73.08-.73 1.2.08 1.83 1.24 1.83 1.24 1.07 1.83 2.8 1.3 3.49.99.1-.78.42-1.3.77-1.6-2.67-.3-5.47-1.34-5.47-6a4.7 4.7 0 011.26-3.24 4.3 4.3 0 01.12-3.2s1-.3 3.3 1.23a11.3 11.3 0 016 0c2.3-1.53 3.3-1.23 3.3-1.23.4 1.1.2 2 .1 2.2a4.7 4.7 0 011.26 3.24c0 4.67-2.8 5.7-5.48 6 .43.36.82 1.1.82 2.2v3.26c0 .32.22.69.83.57C20.56 22.09 24 17.6 24 12c0-6.63-5.37-12-12-12z" />
+            </svg></a>
+        </div>
+      </div>
+    </div>
+    <hr class="border-gray-700 my-6">
+    <p class="text-center text-gray-400 text-sm">&copy; 2025 Automation Tool. All rights reserved.</p>
+  </footer>
+
+</body>
+</html>
