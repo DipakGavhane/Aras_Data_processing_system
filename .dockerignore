@@ -1,0 +1,26 @@
+# Ignore Python cache and compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore Virtual Environment (if any)
+venv/
+.venv/
+.envrc
+*.egg-info/
+pip-wheel-metadata/
+
+# Ignore PyCharm project files
+.idea/
+*.iml
+
+# Ignore logs and temporary files
+logs/
+*.log
+*.sqlite3
+*.db
+
+# Ignore Docker-related files
+Dockerfile
+docker-compose.yml
