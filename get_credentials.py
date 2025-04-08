@@ -1,10 +1,6 @@
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
 from bs4 import BeautifulSoup
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import Select
-from selenium.webdriver.common.keys import Keys
-
-import time
 
 
 class Extraction:
@@ -13,48 +9,16 @@ class Extraction:
         self.driver = None
         self.chrome_option = webdriver.ChromeOptions()
         self.chrome_option.add_experimental_option("detach", True)
+        self.chrome_option.binary_location = "/usr/bin/chromium"
         self.chrome_option.add_argument("--headless")  # Runs Chrome in background
+        self.chrome_option.add_argument("--no-sandbox")
+        self.chrome_option.add_argument("--disable-dev-shm-usage")
 
     def set_driver(self):
-        self.driver = webdriver.Chrome(options=self.chrome_option)
+        # Explicitly specify the ChromeDriver path
+        service = Service("/usr/local/bin/chromedriver")  # Correct way to specify path
+        self.driver = webdriver.Chrome(service=service, options=self.chrome_option)
         self.driver.get(url="https://sgbau.ucanapply.com/result-details")
-
-    def select_options(self):
-        # time.sleep(2)
-        dropdown_element = self.driver.find_element(By.XPATH, value='//*[@id="session"]')
-        select_object = Select(dropdown_element)
-        select_object.select_by_visible_text("Summer 2024")
-
-        dropdown_element = self.driver.find_element(By.XPATH, value='//*[@id="coursetype"]')
-        select_object = Select(dropdown_element)
-        select_object.select_by_visible_text("UG")
-
-        time.sleep(1)
-        course_btn = self.driver.find_element(By.XPATH, value='//*[@id="result-search-panal"]/div[1]/div[3]/div/div/button')
-        course_btn.click()
-
-        course_search = self.driver.find_element(By.XPATH, value='//*[@id="result-search-panal"]/div[1]/div[3]/div/'
-                                                            'div/div/div[1]/input')
-        course_search.send_keys("bca")
-        course_search.send_keys(Keys.ENTER)
-
-        time.sleep(1)
-        dropdown_element = self.driver.find_element(By.XPATH, value='//*[@id="resulttype"]')
-        select_object = Select(dropdown_element)
-        select_object.select_by_visible_text("Regular")
-
-        # time.sleep(1)
-        rollno_field = self.driver.find_element(By.XPATH, value='//*[@id="username"]')
-        rollno_field.send_keys(f'22AK111455')
-
-        # time.sleep(1)
-        dropdown_element = self.driver.find_element(By.XPATH, value='//*[@id="semester"]')
-        select_object = Select(dropdown_element)
-        select_object.select_by_visible_text("Fourth Semester ( Sem - 4)")
-
-        final_btn = self.driver.find_element(By.XPATH, value='//*[@id="result-search-panal"]/div[2]/div[1]/button')
-        final_btn.click()
-        # self.get_html_code()
 
     def get_credentials(self):
         """This method will return authentication key's"""

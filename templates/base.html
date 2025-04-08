@@ -25,7 +25,7 @@
 
     <!-- Navigation Links (Centered) -->
     <ul id="menu"
-        class="hidden md:flex md:space-x-6 absolute md:static bg-gray-900 md:bg-transparent w-full left-0 top-16 md:top-0 md:w-auto flex-col md:flex-row text-center md:text-center transition-all duration-300 ease-in-out opacity-0 md:opacity-100 scale-95 md:scale-100">
+        class="hidden z-1 md:flex md:space-x-6 absolute md:static bg-gray-900 md:bg-transparent w-full left-0 top-16 md:top-0 md:w-auto flex-col md:flex-row text-center md:text-center transition-all duration-300 ease-in-out opacity-0 md:opacity-100 scale-95 md:scale-100">
       <li><a href="{{ url_for('home') }}"
              class="block py-2 px-4 text-gray-300 hover:text-white transition duration-300">Home</a></li>
 
@@ -43,12 +43,51 @@
 
       <!-- Login & Register inside dropdown for mobile -->
       <div class="md:hidden flex flex-col space-y-2 mt-2">
+        {% if not current_user.is_authenticated %}
         <a href="{{ url_for('login') }}"
           class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition duration-300">
           Login
         </a>
+        {% else %}
+           {% if current_user.username == 'admin' %}
+                <div class="relative inline-block text-left">
+                  <button type="button" id="admin-menu-btn"
+                          class="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-gray-800 text-sm font-medium text-white hover:bg-gray-700 focus:outline-none"
+                          aria-expanded="false" aria-haspopup="true">
+                      Admin Menu
+                      <svg class="-mr-1 ml-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                           stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M19 9l-7 7-7-7" />
+                      </svg>
+                  </button>
+
+                  <!-- Dropdown panel -->
+                  <div id="admin-dropdown"
+                       class="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 hidden">
+                    <div class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="admin-menu-btn">
+                      <a href="{{ url_for('create_user') }}"
+                         class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
+                        Register New User
+                      </a>
+                      <a href="{{ url_for('admin_dashboard') }}"
+                         class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
+                        Manage Users
+                      </a>
+                    </div>
+                  </div>
+                </div>
+           {% endif %}
+        <a href="{{ url_for('logout') }}"
+          class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md transition duration-300">
+          Logout
+        </a>
+
+        {% endif %}
       </div>
     </ul>
+
+
     <!-- Right Section: Login/Logout & Admin Dropdown -->
     <div class="hidden md:flex space-x-4 items-center">
       {% if not current_user.is_authenticated %}
