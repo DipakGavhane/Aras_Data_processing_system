@@ -39,6 +39,14 @@
             onclick="switchTab(event, 'resultView')">
             Result View (SGPA)
         </button>
+
+        <!-- Tab Button -->
+        <button
+            class="tab-btn px-4 py-2 text-gray-600 hover:text-blue-600 border-b-2 border-transparent hover:border-blue-600"
+            onclick="switchTab(event, 'barchart_subject_wise')">
+            Subject-wise Scores
+        </button>
+
         <button
             class="tab-btn px-4 py-2 text-gray-600 hover:text-blue-600 border-b-2 border-transparent hover:border-blue-600"
             onclick="switchTab(event, 'moreView')">
@@ -156,6 +164,15 @@
         <canvas id="highestSgpaChart" width="400" height="200"></canvas>
     </div>
 
+
+    <!-- Replace the empty div with this implementation -->
+    <div id="barchart_subject_wise" class="tab-content p-4 hidden pt-8">
+<!--        <h3 class="text-xl font-bold text-center mb-4">Subject-wise Score Distribution</h3>-->
+        <div class="flex justify-center">
+            <canvas id="subjectScoreChart" width="900" height="500"></canvas>
+        </div>
+    </div>
+
     <!-- Overall Tab -->
     <div id="moreView" class="tab-content p-4 hidden">
       <!-- Canvas element for the pie chart -->
@@ -259,6 +276,127 @@
     document.getElementById(tabId).classList.remove('hidden');
     event.currentTarget.classList.add('text-blue-600', 'border-blue-600');
   }
+</script>
+
+<!--Bar chart logic here      -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // Get students data and subjects passed from the server
+    var studentsData = {{ students|tojson }};
+    var subjects = {{ subjects|tojson }};
+
+    // Filter out practical subjects
+    var theorySubjects = subjects.filter(subject => !subject.includes('(P)'));
+
+    // Initialize data arrays for chart
+    var belowThreshold = [];
+    var aboveThreshold = [];
+
+    // Process each subject
+    theorySubjects.forEach(function(subject) {
+        let countBelow = 0;
+        let countAbove = 0;
+
+        // Count students in each category for this subject
+        studentsData.forEach(function(student) {
+            if (student.subjects && student.subjects[subject]) {
+                // Get theory exam score (assuming theory exam is out of 80)
+                let score = student.subjects[subject].exams['theory']['scored'];
+
+                // Count based on threshold (20 marks)
+                if (score !== null && score !== undefined) {
+                    if (parseFloat(score) < 20) {
+                        countBelow++;
+                    } else {
+                        countAbove++;
+                    }
+                }
+            }
+        });
+
+        // Add to arrays
+        belowThreshold.push(countBelow);
+        aboveThreshold.push(countAbove);
+    });
+
+    // Create the bar chart
+    var ctx = document.getElementById('subjectScoreChart').getContext('2d');
+    var subjectScoreChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: theorySubjects,
+            datasets: [
+                {
+                    label: 'Students scoring less than 20',
+                    backgroundColor: 'rgba(231, 76, 60, 0.7)',
+                    borderColor: 'rgba(231, 76, 60, 1)',
+                    borderWidth: 1,
+                    data: belowThreshold
+                },
+                {
+                    label: 'Students scoring 20 or more',
+                    backgroundColor: 'rgba(46, 204, 113, 0.7)',
+                    borderColor: 'rgba(46, 204, 113, 1)',
+                    borderWidth: 1,
+                    data: aboveThreshold
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Students Performance by Subject (Threshold: 20 marks out of 80)',
+                    font: {
+                        size: 16
+                    }
+                },
+                legend: {
+                    position: 'top',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.dataset.label + ': ' + context.raw + ' students';
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Subjects',
+                        font: {
+                            size: 14
+                        }
+                    },
+                    ticks: {
+                        maxRotation: 45,
+                        minRotation: 45
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Number of Students',
+                        font: {
+                            size: 14
+                        }
+                    },
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            },
+            barPercentage: 0.8,
+            categoryPercentage: 0.9
+        }
+    });
+});
 </script>
 
 <!--Line chart logic here      -->

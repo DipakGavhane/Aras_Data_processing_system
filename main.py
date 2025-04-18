@@ -71,7 +71,10 @@ def create_user():
         # Optional: Allow admin to decide if this new user is also an admin.
         is_admin = request.form.get('is_admin', 'false').lower() == 'true'
         hashed_password = generate_password_hash(password)
-        new_user = User(username=username, password=hashed_password, is_admin=is_admin, email=email)
+        new_user = User(username=username,
+                        password=hashed_password,
+                        is_admin=is_admin,
+                        email=email)
         db.session.add(new_user)
         db.session.commit()
         return redirect(url_for('admin_dashboard'))
@@ -167,7 +170,7 @@ def available_data_cards():
             'course_name': batch.course_name,
             'semester': batch.semester,
             'session': batch.session,
-            'type': batch.type.value.upper(),  # Convert enum to string %Y-%m-%d %I:%M:%S %p, %d-%b-%Y %H:%M
+            'type': batch.type.value.upper(),
             'timestamp': batch.timestamp.strftime('%d-%b-%Y -- %I:%M %p'),
             'student_count': len(batch.students)
         })
@@ -272,7 +275,7 @@ def view_batch(batch_id):
     data = [greater_than_8, bet_7_1to_8, bet_6_1to_7, bet_5_1to_6]
     labels = ["Students with SGPA Greater than 8", "Students with SGPA : 7.1 - 8", "Students with SGPA : 6.1 - 7",
               "Students with SGPA : 5.1 - 6"]
-    return render_template('New_db_data.html',
+    return render_template('batch_data_visualization.html',
                            labels=json.dumps(labels),
                            data=json.dumps(data),
                            students=student_data_list,

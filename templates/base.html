@@ -160,7 +160,11 @@
   </script>
 
   <main class="flex-1 container mx-auto py-6">
-  {% block content %}{% endblock %}
+    {% block content %}{% endblock %}
+
+    {% include "modals/error_card.html" %}
+    {% include "modals/loading_screen.html" %}
+    {% include "modals/success_card.html" %}
   </main>
 
  <footer class="bg-gray-900 text-white py-10 mt-auto">
