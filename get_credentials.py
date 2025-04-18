@@ -18,6 +18,7 @@ class Extraction:
         # Explicitly specify the ChromeDriver path
         service = Service("/usr/local/bin/chromedriver")  # Correct way to specify path
         self.driver = webdriver.Chrome(service=service, options=self.chrome_option)
+        # self.driver = webdriver.Chrome(options=self.chrome_option)
         self.driver.get(url="https://sgbau.ucanapply.com/result-details")
 
     def get_credentials(self):

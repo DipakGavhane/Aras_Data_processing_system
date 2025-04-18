@@ -90,10 +90,14 @@
             </button>
         </form>
     </div>
-</div>
+  </div>
+
+  <!-- Include modal components -->
+  {% include 'modals/loading_screen.html' %}
+  {% include 'modals/error_card.html' %}
+  {% include 'modals/success_card.html' %}
 
 <script>
-
     function calculateTotal() {
         let startRoll = document.getElementById('startRollNumber').value;
         let endRoll = document.getElementById('endRollNumber').value;
@@ -131,8 +135,6 @@
         let customRollLabel = document.getElementById('customRollLabel');
 
         if (isChecked) {
-           // startRoll.disabled = true;
-           // endRoll.disabled = true;
             startRoll.classList.add('hidden')
             endRoll.classList.add('hidden')
 
@@ -181,6 +183,106 @@
         }
         semesterSelect.innerHTML = optionsHTML;
     }
+
+    // Modal control functions
+    function showModal(modalId) {
+        document.getElementById(modalId).classList.remove('hidden');
+    }
+
+    function hideModal(modalId) {
+        document.getElementById(modalId).classList.add('hidden');
+    }
+
+    // Add event listeners to close buttons
+    document.querySelectorAll('.modal-close').forEach(button => {
+        button.addEventListener('click', function() {
+            const modal = this.closest('.modal');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+        });
+    });
+
+    // Form submission with loading screen
+    document.getElementById('entry_form').addEventListener('submit', function(e) {
+        e.preventDefault(); // Prevent the default form submission
+
+        // Show loading screen
+        showModal('loadingScreen');
+
+        // Submit the form using fetch API
+        fetch('/add_data', {
+            method: 'POST',
+            body: new FormData(this)
+        })
+        .then(response => {
+            // Process based on response status
+            if (response.ok) {
+                // Check if the response is JSON before trying to parse it
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    return response.json().then(data => {
+                        hideModal('loadingScreen');
+                        showModal('successCard');
+                        return data;
+                    });
+                } else {
+                    // If not JSON, just handle as success
+                    hideModal('loadingScreen');
+                    showModal('successCard');
+                    return null;
+                }
+            } else {
+                // Handle error response
+                return response.text().then(errorText => {
+                    hideModal('loadingScreen');
+                    document.getElementById('errorMessage').textContent =
+                        'Failed to process your request. Please try again.';
+                    showModal('errorCard');
+                    throw new Error(errorText);
+                });
+            }
+        })
+        .catch(error => {
+            // Hide loading screen and show error modal
+            hideModal('loadingScreen');
+            document.getElementById('errorMessage').textContent =
+                'An error occurred during submission. Please try again.';
+            console.error('Error:', error);
+            showModal('errorCard');
+        });
+    });
+
+    // Alternative approach using XMLHttpRequest if fetch isn't supported
+    function submitFormWithXHR() {
+        const form = document.getElementById('entry_form');
+        const formData = new FormData(form);
+        const xhr = new XMLHttpRequest();
+
+        // Show loading screen
+        showModal('loadingScreen');
+
+        xhr.open('POST', form.action);
+
+        xhr.onload = function() {
+            hideModal('loadingScreen');
+            if (xhr.status === 200) {
+                showModal('successCard');
+            } else {
+                document.getElementById('errorMessage').textContent =
+                    'Failed to process your request. Please try again.';
+                showModal('errorCard');
+            }
+        };
+
+        xhr.onerror = function() {
+            hideModal('loadingScreen');
+            document.getElementById('errorMessage').textContent =
+                'A network error occurred. Please check your connection and try again.';
+            showModal('errorCard');
+        };
+
+        xhr.send(formData);
+    }
 </script>
 {% endblock %}
-

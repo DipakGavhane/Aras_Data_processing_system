@@ -17,8 +17,11 @@
             </button>
         </div>
         <p id="errorMessage" class="text-gray-600 mt-4">An error occurred while processing your request.</p>
-        <button class="modal-close mt-6 bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded w-full">
-            Close
-        </button>
+
+        <a href="{{ url_for('available_data_cards') }}">
+            <button class="modal-close mt-6 bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded w-full">
+                Continue
+            </button>
+        </a>
     </div>
 </div>

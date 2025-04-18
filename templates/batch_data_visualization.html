@@ -144,19 +144,42 @@
                   {% endfor %}
               </tbody>
           </table>
-        <div class="flex justify-between m-4">
-            <button id="exportPDF" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md">Download as PDF</button>
-            <button id="exportExcel" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md">Download as Sheet</button>
-            <button id="shareBtn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md">Share This Page</button>
-<!--            <button id="deleteAllBtn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md">Delete All Records</button>-->
-            <!-- View Button  -->
-            <div class="mt-4">
-                <a href="{{ url_for('delete_records', batch_id=batch.id) }}"
-                   class="inline-block bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded transition-colors duration-300">
-                        Delete All Records
-                </a>
-            </div>
-        </div>
+<div class="flex m-4 space-x-4">
+  <!-- Download as PDF -->
+  <button
+    id="exportPDF"
+    class="flex-1 h-10 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors duration-200"
+  >
+    Download as PDF
+  </button>
+
+  <!-- Download as Sheet -->
+  <button
+    id="exportExcel"
+    class="flex-1 h-10 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors duration-200"
+  >
+    Download as Sheet
+  </button>
+
+  <!-- Share This Page -->
+  <button
+    id="shareBtn"
+    class="flex-1 h-10 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors duration-200"
+  >
+    Share This Page
+  </button>
+
+  <!-- Delete All Records (only for admin) -->
+  {% if current_user.username == 'admin' %}
+    <button
+      id="deleteAllBtn"
+      class="flex-1 h-10 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors duration-200"
+    >
+      Delete All Records
+    </button>
+  {% endif %}
+</div>
+
     </div>
 
     <!-- Data visualization Tab -->

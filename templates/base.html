@@ -51,7 +51,7 @@
         {% else %}
            {% if current_user.username == 'admin' %}
                 <div class="relative inline-block text-left">
-                  <button type="button" id="admin-menu-btn"
+                  <button type="button" id="admin-menu-btn-mobile"
                           class="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-gray-800 text-sm font-medium text-white hover:bg-gray-700 focus:outline-none"
                           aria-expanded="false" aria-haspopup="true">
                       Admin Menu
@@ -63,9 +63,9 @@
                   </button>
 
                   <!-- Dropdown panel -->
-                  <div id="admin-dropdown"
+                  <div id="admin-dropdown-mobile"
                        class="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 hidden">
-                    <div class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="admin-menu-btn">
+                    <div class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="admin-menu-btn-mobile">
                       <a href="{{ url_for('create_user') }}"
                          class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
                         Register New User
@@ -97,7 +97,7 @@
       {% else %}
         {% if current_user.username == 'admin' %}
           <div class="relative inline-block text-left">
-            <button type="button" id="admin-menu-btn"
+            <button type="button" id="admin-menu-btn-desktop"
                     class="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-gray-800 text-sm font-medium text-white hover:bg-gray-700 focus:outline-none"
                     aria-expanded="false" aria-haspopup="true">
               Admin Menu
@@ -108,9 +108,9 @@
               </svg>
             </button>
             <!-- Dropdown panel -->
-            <div id="admin-dropdown"
+            <div id="admin-dropdown-desktop"
                  class="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 hidden">
-              <div class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="admin-menu-btn">
+              <div class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="admin-menu-btn-desktop">
                 <a href="{{ url_for('create_user') }}"
                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
                   Register New User
@@ -153,8 +153,15 @@
         menu.classList.add('opacity-0', 'scale-95');
       }
     });
-    document.getElementById('admin-menu-btn').addEventListener('click', function() {
-        const dropdown = document.getElementById('admin-dropdown');
+    // For desktop dropdown
+    document.getElementById('admin-menu-btn-desktop').addEventListener('click', function() {
+        const dropdown = document.getElementById('admin-dropdown-desktop');
+        dropdown.classList.toggle('hidden');
+    });
+
+    // For mobile dropdown
+    document.getElementById('admin-menu-btn-mobile').addEventListener('click', function() {
+        const dropdown = document.getElementById('admin-dropdown-mobile');
         dropdown.classList.toggle('hidden');
     });
   </script>
