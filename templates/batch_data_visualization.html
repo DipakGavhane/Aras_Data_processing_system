@@ -63,6 +63,8 @@
                   <col style="width: 113px;"> <!-- Roll Number -->
                   <col style="width: 95px;"> <!-- College Code -->
                   <col style="width: 108px;"> <!-- Semester -->
+                  <col style="width: 80px;"> <!-- SGPA -->
+
                   {% for subject in subjects if '(P)' not in subject %}
                   <col style="width: 65px;"> <!-- Internal Max -->
                   <col style="width: 65px;"> <!-- Internal Score -->
@@ -70,8 +72,8 @@
                   <col style="width: 65px;"> <!-- Theory Score -->
                   {% endfor %}
                   <col style="width: 85px;"> <!-- Result -->
-                  <col style="width: 80px;"> <!-- SGPA -->
               </colgroup>
+
               <!-- Table Header -->
               <thead style="font-size: medium;">
                   <tr>
@@ -80,13 +82,15 @@
                       <th rowspan="3">Roll Number</th>
                       <th rowspan="3">College Code</th>
                       <th rowspan="3">Semester</th>
+                      <th rowspan="3">SGPA</th>
+
                       {% for subject in subjects if '(P)' not in subject %}
                       <th colspan="4" {% if not loop.last %}class="subject-separator"{% endif %}>
                           {{ subject }}
                       </th>
                       {% endfor %}
                       <th rowspan="3">Result</th>
-                      <th rowspan="3">SGPA</th>
+
                   </tr>
                   <tr>
                       {% for subject in subjects if '(P)' not in subject %}
@@ -123,6 +127,7 @@
                       <td>...</td>
                       {% endif %}
                       <td class="small_text">{{ batch.semester }}</td>
+                      <td>{{ student.sgpa }}</td>
                       {% for subject in subjects if '(P)' not in subject %}
                           {% if subject in student.subjects %}
                           <td>{{ student.subjects[subject].exams['internal']['max'] }}</td>
@@ -139,7 +144,6 @@
                           {% endif %}
                       {% endfor %}
                       <td>{{ student.result }}</td>
-                      <td>{{ student.sgpa }}</td>
                   </tr>
                   {% endfor %}
               </tbody>
