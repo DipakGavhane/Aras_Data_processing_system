@@ -105,15 +105,43 @@
         let submitButton = document.getElementById('submitBtn');
 
         if (startRoll.length === 10 && endRoll.length === 10) {
+            let startPrefix = startRoll.slice(0, -3);
+            let endPrefix = endRoll.slice(0, -3);
             let startNum = parseInt(startRoll.slice(-3));
             let endNum = parseInt(endRoll.slice(-3));
 
-            if (!isNaN(startNum) && !isNaN(endNum) && endNum >= startNum) {
-                let total = endNum - startNum + 1;
-                totalCountElement.textContent = `Total Students: ${total}`;
-                submitButton.disabled = false;
+            if (!isNaN(startNum) && !isNaN(endNum)) {
+                // Case 1: Same prefix - simple comparison
+                if (startPrefix === endPrefix) {
+                    if (endNum >= startNum) {
+                        let total = endNum - startNum + 1;
+                        totalCountElement.textContent = `Total Students: ${total}`;
+                        submitButton.disabled = false;
+                    } else {
+                        totalCountElement.textContent = "Invalid range!";
+                        submitButton.disabled = true;
+                    }
+                }
+                // Case 2: Different prefixes - need to check if end prefix is "greater" than start prefix
+                else {
+                    // Simple lexicographical comparison of prefixes
+                    // This assumes that prefixes are in sequential order
+                    if (endPrefix > startPrefix) {
+                        // Calculate total across prefix boundary
+                        let total = (1000 - startNum) + endNum + 1;
+
+                        // If there are multiple prefixes between start and end,
+                        // you'd need to add 1000 for each intermediate prefix
+
+                        totalCountElement.textContent = `Total Students: ${total}`;
+                        submitButton.disabled = false;
+                    } else {
+                        totalCountElement.textContent = "Invalid prefix order!";
+                        submitButton.disabled = true;
+                    }
+                }
             } else {
-                totalCountElement.textContent = "Invalid range!";
+                totalCountElement.textContent = "Invalid numbers!";
                 submitButton.disabled = true;
             }
         } else {

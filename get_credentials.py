@@ -9,16 +9,16 @@ class Extraction:
         self.driver = None
         self.chrome_option = webdriver.ChromeOptions()
         self.chrome_option.add_experimental_option("detach", True)
-        self.chrome_option.binary_location = "/usr/bin/chromium"
+        # self.chrome_option.binary_location = "/usr/bin/chromium"
         self.chrome_option.add_argument("--headless")  # Runs Chrome in background
         self.chrome_option.add_argument("--no-sandbox")
         self.chrome_option.add_argument("--disable-dev-shm-usage")
 
     def set_driver(self):
         # Explicitly specify the ChromeDriver path
-        service = Service("/usr/local/bin/chromedriver")  # Correct way to specify path
-        self.driver = webdriver.Chrome(service=service, options=self.chrome_option)
-        # self.driver = webdriver.Chrome(options=self.chrome_option)
+        # service = Service("/usr/local/bin/chromedriver")  # Correct way to specify path
+        # self.driver = webdriver.Chrome(service=service, options=self.chrome_option)
+        self.driver = webdriver.Chrome(options=self.chrome_option)
         self.driver.get(url="https://sgbau.ucanapply.com/result-details")
 
     def get_credentials(self):

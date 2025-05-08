@@ -2,19 +2,32 @@ from model import db, Course, CourseSubject, Student, StudentSubject, Exam, Exam
 
 
 def generate_roll_numbers(start_roll: str, end_roll: str):
-    prefix = start_roll[:-3]  # Extracting prefix "22AK111"
-    start_num = int(start_roll[-3:])  # Extracting numeric part (e.g., 490)
-    end_num = int(end_roll[-3:])  # Extracting numeric part (e.g., 501)
+    # Extract parts
+    start_prefix = start_roll[:-3]    # i.e 22AK110
+    end_prefix = end_roll[:-3]        # i.e 22AK111
+    start_num = int(start_roll[-3:])  # i.e 445
+    end_num = int(end_roll[-3:])      # i.e 500
 
     roll_numbers = []
 
-    # Handling roll number transition beyond 999
-    num = start_num
-    while num != end_num + 1:
-        roll_numbers.append(f"{prefix}{num:03d}")
-        num += 1
-        if num > 999:  # Reset to 000 after 999
-            num = 0
+    # Case 1: Same prefix - simple range
+    if start_prefix == end_prefix:
+        for num in range(start_num, end_num + 1):
+            roll_numbers.append(f"{start_prefix}{num:03d}")
+
+    # Case 2: Different prefixes - handle rollover
+    else:
+        # First part: start_prefix with numbers from start_num to 999
+        for num in range(start_num, 1000):
+            roll_numbers.append(f"{start_prefix}{num:03d}")
+
+        # Middle part: if there are intermediate prefixes
+        # For your case, you might need to implement prefix incrementing logic here
+        # This is where you'd handle transitions between prefixes
+
+        # Last part: end_prefix with numbers from 000 to end_num
+        for num in range(0, end_num + 1):
+            roll_numbers.append(f"{end_prefix}{num:03d}")
 
     return roll_numbers
 
