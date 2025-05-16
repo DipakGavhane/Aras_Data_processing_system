@@ -152,7 +152,7 @@
   <!-- Download as PDF -->
   <button
     id="exportPDF"
-    class="flex-1 h-10 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors duration-200"
+    class="flex-1 h-10 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors duration-200 flex items-center justify-center"
   >
     Download as PDF
   </button>
@@ -160,7 +160,7 @@
   <!-- Download as Sheet -->
   <button
     id="exportExcel"
-    class="flex-1 h-10 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors duration-200"
+    class="flex-1 h-10 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors duration-200 flex items-center justify-center"
   >
     Download as Sheet
   </button>
@@ -168,7 +168,7 @@
   <!-- Share This Page -->
   <button
     id="shareBtn"
-    class="flex-1 h-10 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors duration-200"
+    class="flex-1 h-10 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors duration-200 flex items-center justify-center"
   >
     Share This Page
   </button>
@@ -177,7 +177,8 @@
   {% if current_user.username == 'admin' %}
     <button
       id="deleteAllBtn"
-      class="flex-1 h-10 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors duration-200"
+      onclick="window.location.href='{{ url_for('delete_records', batch_id=batch.id) }}'"
+      class="flex-1 h-10 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors duration-200 flex items-center justify-center"
     >
       Delete All Records
     </button>
