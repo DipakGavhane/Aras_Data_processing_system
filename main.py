@@ -231,6 +231,7 @@ def view_batch(batch_id):
             'college': student.college_and_code,
             'result': student.result,
             'sgpa': student.sgpa,
+            'cgpa': student.cgpa,
             'subjects': subjects_dict
         })
 
@@ -245,25 +246,52 @@ def view_batch(batch_id):
     not_given_exam_count = sum(1 for student in student_data_list if not student['subjects'])
     given_exam_count = total_students - not_given_exam_count
 
-    # Compute top students by distinct SGPA (top 3 distinct ranks)
-    # Sort students in descending order by SGPA (casting to float for safety)
-    sorted_students = sorted(student_data_list, key=lambda s: float(s['sgpa'] or 0), reverse=True)
-    top_students = []
+    # Filter students who have CGPA available
+    students_with_cgpa = [s for s in student_data_list if s['cgpa'] and float(s['cgpa']) > 0]
+
+    # Create CGPA ranking (only for students with CGPA)
+    cgpa_top_students = []
+    if students_with_cgpa:
+        sorted_cgpa_students = sorted(students_with_cgpa, key=lambda s: float(s['cgpa']), reverse=True)
+        distinct_ranks = 0
+        prev_cgpa = None
+
+        for student in sorted_cgpa_students:
+            current_cgpa = float(student['cgpa'])
+            if prev_cgpa is None or current_cgpa != prev_cgpa:
+                distinct_ranks += 1
+                if distinct_ranks > 3:
+                    break
+                current_rank = distinct_ranks
+                prev_cgpa = current_cgpa
+
+            student_copy = student.copy()
+            student_copy['rank'] = current_rank
+            cgpa_top_students.append(student_copy)
+
+    # Create SGPA ranking (all students)
+    sorted_sgpa_students = sorted(student_data_list, key=lambda s: float(s['sgpa'] or 0), reverse=True)
+    sgpa_top_students = []
     distinct_ranks = 0
     prev_sgpa = None
 
-    for student in sorted_students:
+    for student in sorted_sgpa_students:
         current_sgpa = float(student['sgpa'] or 0)
-        # New rank group if SGPA differs from previous
         if prev_sgpa is None or current_sgpa != prev_sgpa:
             distinct_ranks += 1
             if distinct_ranks > 3:
                 break
             current_rank = distinct_ranks
             prev_sgpa = current_sgpa
-        # Assign the current rank to the student
-        student['rank'] = current_rank
-        top_students.append(student)
+
+        student_copy = student.copy()
+        student_copy['rank'] = current_rank
+        sgpa_top_students.append(student_copy)
+
+    # Now you have:
+    # cgpa_top_students - Top 3 ranks based on CGPA (only students with CGPA)
+    # sgpa_top_students - Top 3 ranks based on SGPA (all students)
+
 
     students_with_sgpa = [item for item in student_data_list if item['sgpa']]
     greater_than_8 = sum(1 for item in students_with_sgpa if item['sgpa'] > 8)
@@ -287,7 +315,9 @@ def view_batch(batch_id):
                            fail_count=fail_count,
                            given_exam_count=given_exam_count,
                            not_given_exam_count=not_given_exam_count,
-                           top_students=top_students)
+                           cgpa_top_students=cgpa_top_students,
+                           sgpa_top_students=sgpa_top_students)
+
 
 
 @app.route('/delete_batch/<int:batch_id>')

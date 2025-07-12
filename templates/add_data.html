@@ -9,6 +9,25 @@
             <h2 class="text-2xl font-bold mb-6 text-center">Student's Information</h2>
             <hr>
 
+            <!-- Important Note -->
+            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-yellow-800">Important Note</h3>
+                        <div class="mt-2 text-sm text-yellow-700">
+                            <p><strong>Batch Card Metadata:</strong> The batch card will be created with the session information and timestamp from the
+                                <strong>first student's data entry (i.e Starting Roll Number)</strong>.
+                                Please ensure that the <strong>first student's data is present before submitting</strong>, as these will determine the batch identification.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Custom Search Checkbox -->
             <label class="block text-sm font-medium flex items-center">
                 <input type="checkbox" id="customSearch" class="mr-2">
@@ -47,21 +66,35 @@
             <label for="session" class="block text-sm font-medium">Session:</label>
             <select id="session" name="session" class="w-full p-2 border rounded-md focus:ring focus:ring-blue-300" required>
                 <option value="" disabled selected>Select Session</option>
-                <option value="SE08">Summer 2018</option>
-                <option value="SE09">Winter 2018</option>
                 <option value="SE10">Summer 2019</option>
                 <option value="SE11">Winter 2019</option>
+
                 <option value="SE12">Summer 2020</option>
                 <option value="SE13">Winter 2020</option>
+
                 <option value="SE14">Summer 2021</option>
                 <option value="SE15">Winter 2021</option>
+
                 <option value="SE16">Summer 2022</option>
                 <option value="SE17">Winter 2022</option>
+
                 <option value="SE18">Summer 2023</option>
                 <option value="SE19">Winter 2023</option>
+
                 <option value="SE20">Summer 2024</option>
                 <option value="SE21">Winter 2024</option>
+
                 <option value="SE22">Summer 2025</option>
+                <option value="SE23">Winter 2025</option>
+
+                <option value="SE24">Summer 2026</option>
+                <option value="SE25">Winter 2026</option>
+
+                <option value="SE26">Summer 2027</option>
+                <option value="SE27">Winter 2027</option>
+
+                <option value="SE28">Summer 2028</option>
+                <option value="SE29">Winter 2028</option>
             </select>
 
             <label for="semester" class="block text-sm font-medium">Semester:</label>

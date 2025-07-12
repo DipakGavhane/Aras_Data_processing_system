@@ -98,6 +98,7 @@ def push_data(data_list):
                     semester=semester,  # Use batch-level semester
                     session=session,    # Use batch-level session
                     sgpa=student_data.get('sgpa'),
+                    cgpa=student_data.get('cgpa'),
                     course_id=course.id,        # Now available after flush
                     data_batch_id=databatch.id  # Now available after flush
                 )

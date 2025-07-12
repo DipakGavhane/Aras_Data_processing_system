@@ -108,6 +108,7 @@ class Student(db.Model):
     session = db.Column(db.String(20), nullable=True)   # Also stored in DataBatch
     result_type = db.Column(db.String(20), nullable=True)  # Now accepts None
     sgpa = db.Column(db.Float, nullable=True)
+    cgpa = db.Column(db.Float, nullable=True)
 
     # Relationships with foreign keys now set to accept None
     course_id = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=True)

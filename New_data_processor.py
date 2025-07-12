@@ -74,6 +74,10 @@ class HtmlProcessor:
                     self.summary_data["sgpa"] = float(cols[5].get_text(strip=True))
                 except Exception:
                     self.summary_data["sgpa"] = None
+                try:
+                    self.summary_data["cgpa"] = float(cols[7].get_text(strip=True))
+                except Exception:
+                    self.summary_data["cgpa"] = None
 
         # -------------------------------
         # 4. Extract Date of Declaration
@@ -190,6 +194,7 @@ class HtmlProcessor:
             "max_marks_total": self.summary_data.get("max_marks_total", None),
             "result": self.summary_data.get("result", None),
             "sgpa": self.summary_data.get("sgpa", None),
+            "cgpa": self.summary_data.get("cgpa", None),
             "date_of_declaration": self.date_of_declaration
         }
         return student_dict
