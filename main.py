@@ -27,7 +27,7 @@ db.init_app(app)  # Bind the database with the Flask app
 with app.app_context():
     db.create_all()
     username = "admin"
-    password = "admin"
+    password = "Maherbanu260"
     email = 'admin@gmail.com'
     hashed_password = generate_password_hash(password, salt_length=8)
 
